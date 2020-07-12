@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>main.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>main.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">jsonify</span>
+<span class="kn">from</span> <span class="nn">honolulu.dbResources.queries</span> <span class="kn">import</span> <span class="p">(</span><span class="n">get_measurement_all_from</span><span class="p">,</span>
+                                          <span class="n">get_groupBy</span><span class="p">,</span>
+                                          <span class="n">get_measurement_date_partitioned_from</span><span class="p">,</span>
+                                          <span class="n">get_measurement_max_date</span><span class="p">,</span>
+                                          <span class="n">get_measurement_date_partitioned_tobs</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">honolulu.dbResources.dataframe</span> <span class="kn">import</span> <span class="n">HonoluluDf</span>
+<span class="kn">from</span> <span class="nn">honolulu.dbResources.models</span> <span class="kn">import</span>  <span class="n">Measurement</span><span class="p">,</span> <span class="n">Station</span>
+<span class="kn">from</span> <span class="nn">honolulu.settings</span> <span class="kn">import</span> <span class="n">API_ROUTES</span><span class="p">,</span> <span class="n">DEBUG</span>
+
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="n">API_ROUTES</span><span class="p">[</span><span class="s1">&#39;root&#39;</span><span class="p">][</span><span class="s1">&#39;route&#39;</span><span class="p">],</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="n">API_ROUTES</span><span class="p">[</span><span class="s1">&#39;root&#39;</span><span class="p">][</span><span class="s1">&#39;method&#39;</span><span class="p">]])</span>
+<span class="k">def</span> <span class="nf">get_all_routes</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">API_ROUTES</span><span class="p">)</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="n">API_ROUTES</span><span class="p">[</span><span class="s1">&#39;get_precipitation&#39;</span><span class="p">][</span><span class="s1">&#39;route&#39;</span><span class="p">],</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="n">API_ROUTES</span><span class="p">[</span><span class="s1">&#39;get_precipitation&#39;</span><span class="p">][</span><span class="s1">&#39;method&#39;</span><span class="p">]])</span>
+<span class="k">def</span> <span class="nf">get_precipitation</span><span class="p">():</span>
+    <span class="n">prcp_result</span> <span class="o">=</span> <span class="n">get_measurement_all_from</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s1">&#39;prcp&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">prcp_result</span><span class="p">))</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="n">API_ROUTES</span><span class="p">[</span><span class="s1">&#39;get_stations&#39;</span><span class="p">][</span><span class="s1">&#39;route&#39;</span><span class="p">],</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="n">API_ROUTES</span><span class="p">[</span><span class="s1">&#39;get_stations&#39;</span><span class="p">][</span><span class="s1">&#39;method&#39;</span><span class="p">]])</span>
+<span class="k">def</span> <span class="nf">get_stations</span><span class="p">():</span>
+    <span class="n">stations_query</span> <span class="o">=</span> <span class="n">get_groupBy</span><span class="p">(</span><span class="n">Station</span><span class="o">.</span><span class="n">station</span><span class="p">)</span>
+    <span class="n">stations_df</span> <span class="o">=</span> <span class="n">HonoluluDf</span><span class="p">(</span><span class="n">stations_query</span><span class="p">,</span> <span class="s1">&#39;station&#39;</span><span class="p">,</span> <span class="n">Measurement</span><span class="o">.</span><span class="n">prcp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">stations_df</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">))</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="n">API_ROUTES</span><span class="p">[</span><span class="s1">&#39;get_tobs&#39;</span><span class="p">][</span><span class="s1">&#39;route&#39;</span><span class="p">],</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="n">API_ROUTES</span><span class="p">[</span><span class="s1">&#39;get_tobs&#39;</span><span class="p">][</span><span class="s1">&#39;method&#39;</span><span class="p">]])</span>
+<span class="k">def</span> <span class="nf">get_tobs</span><span class="p">():</span>
+    <span class="n">max_date_result</span> <span class="o">=</span> <span class="n">get_measurement_max_date</span><span class="p">()</span>
+    <span class="n">tobs_result</span> <span class="o">=</span> <span class="n">get_measurement_date_partitioned_from</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s1">&#39;tobs&#39;</span><span class="p">,</span>
+                                                        <span class="n">end_date</span><span class="o">=</span><span class="n">max_date_result</span><span class="p">,</span>
+                                                        <span class="n">months_to_decrease</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">tobs_result</span><span class="p">))</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="n">API_ROUTES</span><span class="p">[</span><span class="s1">&#39;get_temp&#39;</span><span class="p">][</span><span class="s1">&#39;route&#39;</span><span class="p">],</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="n">API_ROUTES</span><span class="p">[</span><span class="s1">&#39;get_temp&#39;</span><span class="p">][</span><span class="s1">&#39;method&#39;</span><span class="p">]])</span>
+<span class="k">def</span> <span class="nf">get_temp</span><span class="p">(</span><span class="n">start_date</span><span class="p">):</span>
+    <span class="n">tobs_result</span> <span class="o">=</span> <span class="n">get_measurement_date_partitioned_tobs</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">tobs_result</span><span class="p">))</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="n">API_ROUTES</span><span class="p">[</span><span class="s1">&#39;get_temp_start_end&#39;</span><span class="p">][</span><span class="s1">&#39;route&#39;</span><span class="p">],</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="n">API_ROUTES</span><span class="p">[</span><span class="s1">&#39;get_temp_start_end&#39;</span><span class="p">][</span><span class="s1">&#39;method&#39;</span><span class="p">]])</span>
+<span class="k">def</span> <span class="nf">get_temp_start_end</span><span class="p">(</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">):</span>
+    <span class="n">COLUMN</span> <span class="o">=</span> <span class="s1">&#39;tobs&#39;</span>
+    <span class="n">tobs_result</span> <span class="o">=</span> <span class="n">get_measurement_date_partitioned_tobs</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+                                                        <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
+    <span class="n">stations_df</span> <span class="o">=</span> <span class="n">HonoluluDf</span><span class="p">(</span><span class="n">tobs_result</span><span class="p">,</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="n">COLUMN</span><span class="p">)</span>
+
+    <span class="n">tobs_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;min_temp&#39;</span><span class="p">:</span> <span class="n">stations_df</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span><span class="o">.</span><span class="n">min</span><span class="p">()[</span><span class="n">COLUMN</span><span class="p">],</span>
+                 <span class="s1">&#39;avg_temp&#39;</span><span class="p">:</span> <span class="n">stations_df</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()[</span><span class="n">COLUMN</span><span class="p">],</span>
+                 <span class="s1">&#39;max_temp&#39;</span><span class="p">:</span> <span class="n">stations_df</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()[</span><span class="n">COLUMN</span><span class="p">]}</span>
+
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">tobs_dict</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="n">DEBUG</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

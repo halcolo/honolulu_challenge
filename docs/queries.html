@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>queries.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>queries.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <pre><code>This module implements queries created with sqlAlchemy.
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">dateutil.relativedelta</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">func</span>
+<span class="kn">from</span> <span class="nn">honolulu.dbResources.models</span> <span class="kn">import</span>  <span class="n">Measurement</span>
+<span class="kn">from</span> <span class="nn">honolulu.db</span> <span class="kn">import</span> <span class="n">db_connection</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <h2>Parameters</h2>
+<pre><code>table_value: table from Sqlalchemy model.
+    Model from Sqlalchemy table and module in
+    format 'module.table'.
+</code></pre>
+<h2>Returns</h2>
+<pre><code>Int: with count of all rows from the 'module.table'.
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">get_count</span><span class="p">(</span><span class="n">table_value</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">db_connection</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">table_value</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <h2>Parameters</h2>
+<pre><code>table_value: table from Sqlalchemy model.
+    Model from Sqlalchemy table and module
+    in format 'module.table'.
+</code></pre>
+<h2>Returns</h2>
+<pre><code>Int: with count of all rows from the 'module.table'.
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">get_groupBy</span><span class="p">(</span><span class="n">table_value</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">db_connection</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">row_number</span><span class="p">()</span>
+                                        <span class="o">.</span><span class="n">over</span><span class="p">(</span><span class="n">order_by</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">table_value</span><span class="p">)</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">table_value</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_numb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+                                        <span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="s2">&quot;row_number&quot;</span><span class="p">),</span>
+                                        <span class="n">table_value</span><span class="p">,</span>
+                                        <span class="n">func</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">table_value</span><span class="p">)</span> \
+                                        <span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">table_value</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_numb&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">group_by</span><span class="p">(</span><span class="n">table_value</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <h2>Parameters</h2>
+<pre><code>column: str
+    set 'tobs' or 'prcp' column.
+end_date: str
+    determine the final date to get data.
+months_to_decrease: Int
+    number of months to calculate from which
+    date do filter.
+</code></pre>
+<h2>Returns</h2>
+<pre><code>list: with the values of the query
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">get_measurement_date_partitioned_from</span><span class="p">(</span><span class="n">column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                          <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                          <span class="n">months_to_decrease</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">try</span><span class="p">:</span>
+        <span class="n">source_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;prcp&#39;</span><span class="p">:</span> <span class="n">Measurement</span><span class="o">.</span><span class="n">prcp</span><span class="p">,</span>
+                       <span class="s1">&#39;tobs&#39;</span><span class="p">:</span> <span class="n">Measurement</span><span class="o">.</span><span class="n">tobs</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">column</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">source_dict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;column error&#39;</span><span class="p">)]</span>
+
+        <span class="n">table_lable</span> <span class="o">=</span> <span class="n">source_dict</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
+        <span class="n">lable_name</span> <span class="o">=</span> <span class="n">column</span>
+
+        <span class="n">trfm_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">end_date</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">start_date</span> <span class="o">=</span> <span class="n">trfm_date</span> <span class="o">-</span> <span class="n">dateutil</span><span class="o">.</span><span class="n">relativedelta</span><span class="o">.</span><span class="n">relativedelta</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="n">months_to_decrease</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">db_connection</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Measurement</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">),</span>
+                                        <span class="n">table_lable</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">lable_name</span><span class="p">)))</span> \
+            <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Measurement</span><span class="o">.</span><span class="n">date</span> <span class="o">&gt;</span> <span class="n">start_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">),</span>
+                    <span class="n">Measurement</span><span class="o">.</span><span class="n">date</span> <span class="o">&lt;</span> <span class="n">end_date</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">table_lable</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">lable_name</span><span class="p">))</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <h2>Parameters</h2>
+<pre><code>column: str
+    set 'tobs' or 'prcp' column.
+</code></pre>
+<h2>Returns</h2>
+<pre><code>list: with the values of the query
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">get_measurement_all_from</span><span class="p">(</span><span class="n">column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">try</span><span class="p">:</span>
+        <span class="n">source_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;prcp&#39;</span><span class="p">:</span> <span class="n">Measurement</span><span class="o">.</span><span class="n">prcp</span><span class="p">,</span>
+                       <span class="s1">&#39;tobs&#39;</span><span class="p">:</span> <span class="n">Measurement</span><span class="o">.</span><span class="n">tobs</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">column</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">source_dict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;column error&#39;</span><span class="p">)]</span>
+
+        <span class="n">table_lable</span> <span class="o">=</span> <span class="n">source_dict</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
+        <span class="n">lable_name</span> <span class="o">=</span> <span class="n">column</span>
+
+        <span class="k">return</span> <span class="n">db_connection</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Measurement</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">),</span>
+                                        <span class="n">table_lable</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">lable_name</span><span class="p">)))</span> \
+            <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">table_lable</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">lable_name</span><span class="p">))</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <h2>Returns</h2>
+<pre><code>str: max date in the table Measurement
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">get_measurement_max_date</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">db_connection</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">Measurement</span><span class="o">.</span><span class="n">date</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <h2>Parameters</h2>
+<pre><code>start_date: str
+    determine the start date to get data.
+end_date: str
+    determine the final date to get data.
+</code></pre>
+<h2>Returns</h2>
+<pre><code>list: with the values of the query
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">get_measurement_date_partitioned_tobs</span><span class="p">(</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">try</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">actual_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+            <span class="n">end_date</span> <span class="o">=</span> <span class="n">actual_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">db_connection</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Measurement</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">),</span>
+                                        <span class="n">Measurement</span><span class="o">.</span><span class="n">tobs</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;tobs&#39;</span><span class="p">)))</span> \
+            <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Measurement</span><span class="o">.</span><span class="n">date</span> <span class="o">&gt;</span> <span class="n">start_date</span><span class="p">,</span>
+                    <span class="n">Measurement</span><span class="o">.</span><span class="n">date</span> <span class="o">&lt;</span> <span class="n">end_date</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">Measurement</span><span class="o">.</span><span class="n">tobs</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;tobs&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>
